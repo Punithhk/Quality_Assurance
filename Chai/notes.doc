@@ -1,0 +1,155 @@
+Chai is a JavaScript testing library that helps you confirm that your program still behaves the way you expect it to after you make changes to your code.
+
+Using Chai, you can write tests that describe your program's requirements and see if your program meets them.
+
+In this course, you'll learn about assertions, deep equality, truthiness, testing APIs, and other fundamentals for testing JavaScript applications.
+
+Within tests/1_unit-tests.js under the test labelled #2 in the Basic Assertions suite, change each assert to either assert.isDefined() or assert.isUndefined() to make the test pass (should evaluate to true). Do not alter the arguments passed to the asserts.
+
+isOk() will test for a truthy value, and isNotOk() will test for a falsy value.
+
+isTrue() will test for the boolean value true and isNotTrue() will pass when given anything but the boolean value of true.
+
+assert.isTrue(true, 'this will pass with the boolean value true');
+assert.isTrue('true', 'this will NOT pass with the string value "true"');
+assert.isTrue(1, 'this will NOT pass with the number value 1');
+isFalse() and isNotFalse() also exist, and behave similarly to their true counterparts except they look for the boolean value of false.
+
+equal() compares objects using ==.
+
+
+strictEqual() compares objects using ===.
+
+deepEqual() asserts that two objects are deep equal.
+
+ assert.isAbove or assert.isAtMost
+ assert.isBelow or assert.isAtLeast 
+
+.approximately(actual, expected, delta, [message])
+Asserts that the actual is equal to expected, to within a +/- delta range.
+
+ assert.isArray or assert.isNotArray
+ assert.include or assert.notInclude
+assert.isString or assert.isNotString 
+include() and notInclude() work for strings too! include() asserts that the actual string contains the expected substring.
+
+match() asserts that the actual value matches the second argument regular expression.
+property asserts that the actual object has a given property.
+#typeOf asserts that value's type is the given string, as determined by Object.prototype.toString.
+
+#instanceOf asserts that an object is an instance of a constructor.
+
+Run Functional Tests on API Endpoints using Chai-HTTP
+As a reminder, this project is being built upon the following starter project on Replit, or cloned from GitHub.
+
+Mocha allows testing asyncronous operations. There is a small (BIG) difference. Can you spot it?
+
+We can test our API endpoints using a plugin, called chai-http. Let's see how it works. And remember, API calls are asynchronous.
+
+The following is an example of a test using chai-http for the 'GET /hello?name=[name] => "hello [name]"' suite. The test sends a name string in a url query string (?name=John) using a GETrequest to the server. In the end method's callback function, the response object (res) is received and contains the status property. The first assert.equal checks if the status is equal to 200. The second assert.equal checks that the response string (res.text) is equal to "hello John".
+
+suite('GET /hello?name=[name] => "hello [name]"', function () {
+  test("?name=John", function (done) {
+    chai
+      .request(server)
+      .get("/hello?name=John")
+      .end(function (err, res) {
+        assert.equal(res.status, 200, "response status should be 200");
+        assert.equal(
+          res.text,
+          "hello John",
+          'response should be "hello John"'
+        );
+        done();
+      });
+  });
+Notice the done parameter in the test's callback function. Calling it at the end without an argument is necessary to signal successful asynchronous completion.
+
+Run Functional Tests on an API Response using Chai-HTTP III - PUT method
+In the next example we'll see how to send data in a request payload (body). We are going to test a PUT request. The '/travellers' endpoint accepts a JSON object taking the structure:
+
+{
+  "surname": [last name of a traveller of the past]
+}
+The route responds with :
+
+{
+  "name": [first name], "surname": [last name], "dates": [birth - death years]
+}
+See the server code for more details.
+
+}
+Check for the following, within the request.end callback:
+
+status
+type
+body.name
+body.surname
+
+
+Simulate Actions Using a Headless Browser
+As a reminder, this project is being built upon the following starter project on Replit, or cloned from GitHub.
+
+In the next challenges we are going to simulate the human interaction with a page using a device called 'Headless Browser'.
+
+A headless browser is a web browser without a graphical user interface. This kind of tool is particularly useful for testing web pages, as it is able to render and understand HTML, CSS, and JavaScript the same way a browser would.
+
+For these challenges we are using Zombie.JS. It's a lightweight browser which is totally based on JS, without relying on additional binaries to be installed. This feature makes it usable in an environment such as Replit. There are many other (more powerful) options.
+
+Mocha allows you to prepare the ground running some code before the actual tests. This can be useful for example to create items in the database, which will be used in the successive tests.
+
+With a headless browser, before the actual testing, we need to visit the page we are going to inspect. The suiteSetup 'hook' is executed only once at the suite startup. Other different hook types can be executed before each test, after each test, or at the end of a suite. See the Mocha docs for more information.
+
+Within tests/2_functional-tests.js, immediately after the Browser declaration, add your project URL to the site property of the variable:
+
+Browser.site = 'https://sincere-cone.gomix.me'; // Your URL here
+If you are testing on a local environment replace the line above with
+
+Browser.localhost('example.com', process.env.PORT || 3000);
+Within tests/2_functional-tests.js, at the root level of the 'Functional Tests with Zombie.js' suite, instantiate a new instance of the Browser object with the following code:
+
+const browser = new Browser();
+Then, use the suiteSetup hook to direct the browser to the / route with the following code:
+
+suiteSetup(function(done) {
+  return browser.visit('/', done);
+});
+
+
+Run Functional Tests using a Headless Browser
+As a reminder, this project is being built upon the following starter project on Replit, or cloned from GitHub.
+
+In the HTML main view we provided a input form. It sends data to the PUT /travellers endpoint that we used above with an Ajax request. When the request successfully completes, the client code appends a <div> containing the info returned by the call to the DOM. Here is an example of how to interact with this form:
+
+test('#test - submit the input "surname" : "Polo"', function (done) {
+  browser.fill('surname', 'Polo').pressButton('submit', function () {
+    browser.assert.success();
+    browser.assert.text('span#name', 'Marco');
+    browser.assert.text('span#surname', 'Polo');
+    browser.assert.element('span#dates', 1);
+    done();
+  });
+}
+First, the fill method of the browser object fills the surname field of the form with the value 'Polo'. Immediately after, the pressButton method invokes the submit event listener of the form. The pressButton method is asynchronous.
+
+Then, once a response is received from the AJAX request, a few assertions are made confirming:
+
+The status of the response is 200
+The text within the <span id='name'></span> element matches 'Marco'
+The text within the <span id='surname'></span> element matches 'Polo'
+There is 1 <span id='dates'></span> element.
+Finally, the done callback is invoked, which is needed due to the asynchronous test.
+
+Within tests/2_functional-tests.js, in the 'submit "surname" : "Colombo" - write your e2e test...' test (// #5), automate filling-in and submitting the form:
+
+Fill in the form
+Submit it pressing 'submit' button.
+Within the callback:
+
+assert that status is OK 200
+assert that the text inside the element span#name is 'Cristoforo'
+assert that the text inside the element span#surname is 'Colombo'
+assert that the element(s) span#dates exist and their count is 1
+Do not forget to remove the assert.fail() call.
+
+Run Functional Tests Using a Headless Browser II
